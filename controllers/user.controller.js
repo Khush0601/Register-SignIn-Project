@@ -20,12 +20,19 @@ exports.signUp=async(req,res)=>{
   //2.insert data of user into database
   const savingUser=await UserModel.create(userObj)
    //3.fetch data from database to show in frontend
-
+  const message={
+    message:' register successfully'
+  }
+  if(savingUser){
+     return res.status(201).send(message)
+  }
+  else{
+  return  res.status(404).send({
+     message:"register unsuccessfull"
+    })
+  }
   
-  res.status(201).send(savingUser)
-
-
-    }
+   }
     catch(err){
 console.log("error while registering user",err.message)
    res.status(500).send({
@@ -43,7 +50,7 @@ exports.signIn=async(req,res)=>{
      const validUser=await UserModel.findOne({userId:userIdFromReq})
      if(!validUser){
          return res.status(401).send({
-             message:"userId is not correct"
+             message:"entered credential is wrong"
          })
      }
    //3.check entered password is correct or not
@@ -51,11 +58,21 @@ exports.signIn=async(req,res)=>{
  
      if(!isValidPassword){
          return res.status(401).send({
-             message:"password is not correct"
+             message:"entered credential is wrong"
          })
      }
-     res.status(200).send(validUser)
+//    const requiredUserData={
+//     name:validUser.name,
+//     email:validUser.email,
+//     userId:validUser.userId,
+//     userType:validUser.userType,
+    
+//    }
+const {password,userStatus,createdAt,updatedAt,...restData}=validUser._doc;
+console.log(restData)
+     res.status(200).send(restData)
    }
+ 
    catch(err){
     console.log('error while login ',err.message)
     res.status(500).send({
