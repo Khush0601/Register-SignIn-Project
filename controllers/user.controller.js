@@ -1,5 +1,7 @@
 const bcrypt=require('bcryptjs')
 const UserModel=require('../models/user.model')
+const jwt = require('jsonwebtoken');
+const serverConfigs = require('../configs/server.configs');
 exports.signUp=async(req,res)=>{
 
     try{
@@ -57,6 +59,8 @@ exports.signIn=async(req,res)=>{
      const isValidPassword=bcrypt.compareSync(passwordFromReq,validUser.password)
  
      if(!isValidPassword){
+
+    
          return res.status(401).send({
              message:"entered credential is wrong"
          })
@@ -69,8 +73,22 @@ exports.signIn=async(req,res)=>{
     
 //    }
 const {password,userStatus,createdAt,updatedAt,...restData}=validUser._doc;
+
+//after valdating user generating access token 
+
+const token=jwt.sign({
+    id:validUser._id,
+     expiresIn:60*60*5,
+   
+},serverConfigs.secret)
+console.log(token)
 console.log(restData)
-     res.status(200).send(restData)
+     res.status(200).send(
+        {
+            ...restData,
+            token:token,
+        }
+     )
    }
  
    catch(err){
